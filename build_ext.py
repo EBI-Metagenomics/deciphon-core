@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     ffibuilder.cdef(open(INTERFACE, "r").read())
     ffibuilder.set_source(
-        "deciphon.cffi",
+        "deciphon_core.cffi",
         """
         #include "deciphon/deciphon.h"
         """,
