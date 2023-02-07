@@ -1,8 +1,9 @@
 from __future__ import annotations
-from typing import Union
 
+import shutil
 from os import PathLike
 from pathlib import Path
+from typing import Union
 
 from deciphon_core.cffi import ffi, lib
 from deciphon_core.error import DeciphonError
@@ -36,7 +37,7 @@ class Scan:
         if rc:
             raise DeciphonError(rc)
 
-    def run(self, name: Union[str, bytes, None]) -> str:
+    def run(self, name: Union[str, bytes, None]):
         if not name:
             name = f"{self._seq.name}"
 
@@ -45,7 +46,8 @@ class Scan:
         if rc:
             raise DeciphonError(rc)
 
-        return x.decode()
+        shutil.make_archive(x.decode(), "zip", x.decode())
+        return shutil.move(x.decode(), Path(x.decode()).stem + ".dcs")
 
     def __enter__(self):
         return self
