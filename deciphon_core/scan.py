@@ -36,14 +36,16 @@ class Scan:
         if rc:
             raise DeciphonError(rc)
 
-    def run(self, name: Union[str, bytes, None]):
+    def run(self, name: Union[str, bytes, None]) -> str:
         if not name:
-            name = f"{self._seq.name}.dcs"
+            name = f"{self._seq.name}"
 
         x = name.encode() if isinstance(name, str) else name
         rc = lib.dcp_scan_run(self._cscan, x)
         if rc:
             raise DeciphonError(rc)
+
+        return x.decode()
 
     def __enter__(self):
         return self
