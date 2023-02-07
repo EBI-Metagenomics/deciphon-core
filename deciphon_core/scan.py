@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Union
 
 from os import PathLike
 from pathlib import Path
@@ -10,7 +11,7 @@ __all__ = ["Scan"]
 
 
 class Scan:
-    def __init__(self, hmm: str | PathLike[str], seq: str | PathLike[str]):
+    def __init__(self, hmm: Union[str, PathLike[str]], seq: Union[str, PathLike[str]]):
         self._cscan = lib.dcp_scan_new(0)
         if self._cscan == ffi.NULL:
             raise MemoryError()
@@ -35,8 +36,12 @@ class Scan:
         if rc:
             raise DeciphonError(rc)
 
-    def run(self, prod: str | PathLike[str]):
-        rc = lib.dcp_scan_run(self._cscan, bytes(Path(prod)))
+    def run(self, name: Union[str, bytes, None]):
+        if not name:
+            name = f"{self._seq.name}.dcs"
+
+        x = name.encode() if isinstance(name, str) else name
+        rc = lib.dcp_scan_run(self._cscan, x)
         if rc:
             raise DeciphonError(rc)
 
