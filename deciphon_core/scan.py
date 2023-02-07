@@ -37,7 +37,7 @@ class Scan:
         if rc:
             raise DeciphonError(rc)
 
-    def run(self, name: Union[str, bytes, None]):
+    def run(self, name: Union[str, bytes, None] = None):
         if not name:
             name = f"{self._seq.name}"
 
