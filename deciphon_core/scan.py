@@ -60,7 +60,7 @@ class Scan:
         if rc:
             raise DeciphonError(rc)
 
-        archive = shutil.make_archive(base_name, "zip", base_name)
+        archive = shutil.make_archive(base_name, "zip", base_dir=base_name)
         shutil.move(archive, self.product_name)
         shutil.rmtree(base_name)
 
