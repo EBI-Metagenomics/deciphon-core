@@ -12,8 +12,10 @@ __all__ = ["Scan"]
 
 
 class Scan:
-    def __init__(self, hmm: Union[str, PathLike[str]], seq: Union[str, PathLike[str]]):
-        self._cscan = lib.dcp_scan_new(0)
+    def __init__(
+        self, hmm: Union[str, PathLike[str]], seq: Union[str, PathLike[str]], port: int
+    ):
+        self._cscan = lib.dcp_scan_new(port)
         if self._cscan == ffi.NULL:
             raise MemoryError()
 
