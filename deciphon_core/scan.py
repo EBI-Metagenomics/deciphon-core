@@ -54,7 +54,6 @@ class Scan:
 
     def __exit__(self, *_):
         self.close()
-        return True
 
     def close(self):
         lib.dcp_scan_del(self._cscan)

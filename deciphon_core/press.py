@@ -24,7 +24,6 @@ class Press:
 
     def __exit__(self, *_):
         self.close()
-        return True
 
     def open(self):
         rc = lib.dcp_press_open(self._cpress, bytes(self._hmm), bytes(self._db))
