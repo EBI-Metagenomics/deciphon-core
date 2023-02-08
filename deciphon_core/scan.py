@@ -37,17 +37,29 @@ class Scan:
         if rc:
             raise DeciphonError(rc)
 
-    def run(self, name: Union[str, bytes, None] = None):
-        if not name:
-            name = f"{self._seq.name}"
+        self._base_name = f"{self._seq.stem}"
 
-        x = name.encode() if isinstance(name, str) else name
-        rc = lib.dcp_scan_run(self._cscan, x)
+    @property
+    def base_name(self):
+        return self._base_name
+
+    @base_name.setter
+    def base_name(self, x: str):
+        self._base_name = x
+
+    @property
+    def product_name(self):
+        return self.base_name + ".dcs"
+
+    def run(self):
+        base_name = self.base_name
+
+        rc = lib.dcp_scan_run(self._cscan, base_name.encode())
         if rc:
             raise DeciphonError(rc)
 
-        shutil.make_archive(x.decode(), "zip", x.decode())
-        return shutil.move(x.decode(), Path(x.decode()).stem + ".dcs")
+        shutil.make_archive(base_name, "zip", base_name)
+        shutil.move(base_name, self.product_name)
 
     def __enter__(self):
         return self
