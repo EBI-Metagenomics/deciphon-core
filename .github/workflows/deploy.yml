@@ -2,9 +2,6 @@ name: Deploy
 
 on: push
 
-env:
-  CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
-
 jobs:
   make_sdist:
     name: Make SDist
@@ -31,6 +28,9 @@ jobs:
 
       - name: Build wheels
         run: pipx run cibuildwheel==2.12.0
+        env:
+          CIBW_ARCHS_MACOS: x86_64 arm64
+          CIBW_PROJECT_REQUIRES_PYTHON: ">=3.9"
 
       - uses: actions/upload-artifact@v3
         with:

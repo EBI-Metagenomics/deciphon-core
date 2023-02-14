@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import sys
+import platform
 import tarfile
 import urllib.request
 from dataclasses import dataclass
@@ -58,6 +59,16 @@ def rm(folder: Path, pattern: str):
         filename.unlink()
 
 
+def darwin_setup():
+    machine = platform.machine()
+    # Set by setuptools/cibuildwheels
+    archflags = os.environ.get("ARCHFLAGS")
+    if archflags is not None:
+        machine = ";".join(set(archflags.split()) & {"x86_64", "arm64"})
+
+    os.environ.setdefault("CMAKE_OSX_ARCHITECTURES", machine)
+
+
 def build_ext(ext: Ext):
     from cmake import CMAKE_BIN_DIR
 
@@ -77,6 +88,9 @@ def build_ext(ext: Ext):
 
     with tarfile.open(TMP / tar_filename) as tf:
         tf.extractall(TMP)
+
+    if sys.platform == "darwin":
+        darwin_setup()
 
     cmake = [str(v) for v in Path(CMAKE_BIN_DIR).glob("cmake*")][0]
     check_call([cmake, "-S", str(prj_dir), "-B", str(bld_dir)] + ext.cmake_opts)
