@@ -1,5 +1,6 @@
 struct dcp_press;
 struct dcp_scan;
+struct h3c_result;
 
 struct dcp_press *dcp_press_new(void);
 int dcp_press_open(struct dcp_press *, char const *hmm, char const *db);
@@ -23,3 +24,15 @@ int dcp_scan_set_seq_file(struct dcp_scan *, char const *seqs);
 int dcp_scan_run(struct dcp_scan *, char const *name);
 
 char const *dcp_strerror(int err);
+
+struct h3c_result *h3c_result_new(void);
+void h3c_result_del(struct h3c_result const *);
+int h3c_result_unpack(struct h3c_result *, FILE *);
+void h3c_result_print_targets(struct h3c_result const *, FILE *);
+void h3c_result_print_domains(struct h3c_result const *, FILE *);
+void h3c_result_print_targets_table(struct h3c_result const *, FILE *);
+void h3c_result_print_domains_table(struct h3c_result const *, FILE *);
+
+FILE *fopen(char const *filename, char const *mode);
+FILE *fdopen(int, char const *);
+int fclose(FILE *);

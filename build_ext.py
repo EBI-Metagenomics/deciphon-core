@@ -103,9 +103,10 @@ if __name__ == "__main__":
         "deciphon_core.cffi",
         """
         #include "deciphon/deciphon.h"
+        #include "h3c/h3c.h"
         """,
         language="c",
-        libraries=["deciphon"],
+        libraries=["deciphon", "h3c"],
         library_dirs=[str(LIB)],
         include_dirs=[str(INCL)],
         extra_link_args=[str(EXTRA)],
