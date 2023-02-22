@@ -18,7 +18,7 @@ class File:
 
 @pytest.fixture
 def h3r_file():
-    cid = CID("2427439024da42a5cead8d31bdab294b80b1119f00c4743581ed87b62211760c")
+    cid = CID("8f362179042318deb77fe043e79eef9ce6ef54b852b447b4eee4b5d0ff6bb30d")
     name = "PF00742.20.h3r"
     return File(cid, name)
 
