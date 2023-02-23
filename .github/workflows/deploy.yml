@@ -19,7 +19,7 @@ jobs:
       with:
         path: dist/*.tar.gz
 
-  make_amd64_wheels:
+  make_wheels:
     name: Make wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -31,31 +31,13 @@ jobs:
 
       - name: Build wheels
         run: pipx run cibuildwheel==2.12.0
-        env:
-          CIBW_ARCHS_MACOS: x86_64
-
-      - uses: actions/upload-artifact@v3
-        with:
-          path: wheelhouse/*.whl
-
-  make_arm64_wheels:
-    name: Make wheels on macos-12 for arm64
-    runs-on: macos-12
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Build wheels
-        run: pipx run cibuildwheel==2.12.0
-        env:
-          CIBW_ARCHS_MACOS: arm64
 
       - uses: actions/upload-artifact@v3
         with:
           path: wheelhouse/*.whl
 
   upload_all:
-    needs: [make_amd64_wheels, make_arm64_wheels, make_sdist]
+    needs: [make_wheels, make_sdist]
     runs-on: ubuntu-22.04
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
