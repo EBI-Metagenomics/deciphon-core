@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Optional
 
 from deciphon_core.cffi import ffi, lib
 from deciphon_core.error import DeciphonError
@@ -9,14 +10,40 @@ from deciphon_core.filepath import FilePath
 __all__ = ["Press"]
 
 
+class HMMPress:
+    def __init__(self, press: Press):
+        self._press: Optional[Press] = press
+
+    def press(self):
+        assert self._press
+        if rc := lib.dcp_press_next(self._press.cpress):
+            raise DeciphonError(rc)
+        self._press = None
+
+
 class Press:
     def __init__(self, hmm: FilePath, db: FilePath):
+        self._cpress = ffi.NULL
+        self._hmm = Path(hmm)
+        self._db = Path(db)
+        self._nproteins: int = -1
+        self._idx = -1
+
+    @property
+    def cpress(self):
+        return self._cpress
+
+    def open(self):
         self._cpress = lib.dcp_press_new()
         if self._cpress == ffi.NULL:
             raise MemoryError()
 
-        self._hmm = Path(hmm)
-        self._db = Path(db)
+        if rc := lib.dcp_press_open(self._cpress, bytes(self._hmm), bytes(self._db)):
+            raise DeciphonError(rc)
+
+    def close(self):
+        if rc := lib.dcp_press_close(self._cpress):
+            raise DeciphonError(rc)
 
     def __enter__(self):
         self.open()
@@ -25,31 +52,25 @@ class Press:
     def __exit__(self, *_):
         self.close()
 
-    def open(self):
-        rc = lib.dcp_press_open(self._cpress, bytes(self._hmm), bytes(self._db))
-        if rc:
-            raise DeciphonError(rc)
-
-    def close(self):
-        rc = lib.dcp_press_close(self._cpress)
-        if rc:
-            raise DeciphonError(rc)
+    @property
+    def nproteins(self) -> int:
+        if self._nproteins == -1:
+            self._nproteins: int = lib.dcp_press_nproteins(self._cpress)
+        return self._nproteins
 
     def __len__(self):
-        return lib.dcp_press_nproteins(self._cpress)
+        return self.nproteins
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        rc = lib.dcp_press_next(self._cpress)
-        if rc:
-            raise DeciphonError(rc)
-
-        if lib.dcp_press_end(self._cpress):
-            raise StopIteration
-
-        return 1
+        self._idx += 1
+        if self._idx < self.nproteins:
+            return HMMPress(self)
+        raise StopIteration()
 
     def __del__(self):
-        lib.dcp_press_del(self._cpress)
+        if self._cpress != ffi.NULL:
+            lib.dcp_press_del(self._cpress)
+            self._cpress = ffi.NULL
