@@ -1,27 +1,24 @@
 from __future__ import annotations
 
 import shutil
-from os import PathLike
 from pathlib import Path
-from typing import Union
 
 from deciphon_core.cffi import ffi, lib
 from deciphon_core.error import DeciphonError
+from deciphon_core.filepath import FilePath
+from deciphon_core.seq import SeqIter
 
 __all__ = ["Scan"]
 
 
 class Scan:
-    def __init__(
-        self, hmm: Union[str, PathLike[str]], seq: Union[str, PathLike[str]], port: int
-    ):
+    def __init__(self, hmm: FilePath, seqit: SeqIter, base_name: str, port: int):
         self._cscan = lib.dcp_scan_new(port)
         if self._cscan == ffi.NULL:
             raise MemoryError()
 
         self._hmm = Path(hmm)
         self._db = Path(self._hmm.stem + ".dcp")
-        self._seq = Path(seq)
 
         rc = lib.dcp_scan_set_nthreads(self._cscan, 1)
         if rc:
@@ -35,11 +32,10 @@ class Scan:
         if rc:
             raise DeciphonError(rc)
 
-        rc = lib.dcp_scan_set_seq_file(self._cscan, bytes(self._seq))
-        if rc:
-            raise DeciphonError(rc)
+        self._seqit = seqit
+        lib.dcp_scan_set_seq_iter(self._cscan, seqit.cnext_seq_callb, seqit.cself)
 
-        self._base_name = f"{self._seq.stem}"
+        self._base_name = base_name
 
     @property
     def base_name(self):

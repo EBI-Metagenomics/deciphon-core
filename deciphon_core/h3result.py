@@ -1,14 +1,14 @@
-from os import PathLike
 import os
 from pathlib import Path
 
 from deciphon_core.cffi import ffi, lib
+from deciphon_core.filepath import FilePath
 
 __all__ = ["H3Result"]
 
 
 class H3Result:
-    def __init__(self, filepath: str | PathLike[str]):
+    def __init__(self, filepath: FilePath):
         self._cdata = ffi.NULL
 
         self._cdata = lib.h3c_result_new()

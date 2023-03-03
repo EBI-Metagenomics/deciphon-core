@@ -1,6 +1,12 @@
 struct dcp_press;
 struct dcp_scan;
+struct dcp_seq;
 struct h3c_result;
+
+typedef bool dcp_seq_next_fn(struct dcp_seq *, void *);
+
+void dcp_seq_setup(struct dcp_seq *, long id, char const *name,
+                   char const *data);
 
 struct dcp_press *dcp_press_new(void);
 int dcp_press_open(struct dcp_press *, char const *hmm, char const *db);
@@ -19,7 +25,7 @@ void dcp_scan_set_multi_hits(struct dcp_scan *, bool);
 void dcp_scan_set_hmmer3_compat(struct dcp_scan *, bool);
 
 int dcp_scan_set_db_file(struct dcp_scan *, char const *db);
-int dcp_scan_set_seq_file(struct dcp_scan *, char const *seqs);
+void dcp_scan_set_seq_iter(struct dcp_scan *, dcp_seq_next_fn *, void *);
 
 int dcp_scan_run(struct dcp_scan *, char const *name);
 
@@ -36,3 +42,5 @@ void h3c_result_print_domains_table(struct h3c_result const *, FILE *);
 FILE *fopen(char const *filename, char const *mode);
 FILE *fdopen(int, char const *);
 int fclose(FILE *);
+
+extern "Python" bool next_seq_callb(struct dcp_seq *, void *);

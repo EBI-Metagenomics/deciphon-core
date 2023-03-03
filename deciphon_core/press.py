@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from os import PathLike
 from pathlib import Path
 
 from deciphon_core.cffi import ffi, lib
 from deciphon_core.error import DeciphonError
+from deciphon_core.filepath import FilePath
 
 __all__ = ["Press"]
 
 
 class Press:
-    def __init__(self, hmm: str | PathLike[str], db: str | PathLike[str]):
+    def __init__(self, hmm: FilePath, db: FilePath):
         self._cpress = lib.dcp_press_new()
         if self._cpress == ffi.NULL:
             raise MemoryError()
