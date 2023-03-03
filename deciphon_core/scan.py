@@ -8,17 +8,18 @@ from deciphon_core.error import DeciphonError
 from deciphon_core.filepath import FilePath
 from deciphon_core.seq import SeqIter
 from deciphon_core.cseq import CSeqIter
+from deciphon_core.snapfile import SnapFile
 
 __all__ = ["Scan"]
 
 
 class Scan:
-    def __init__(self, hmm: FilePath, db: FilePath, seqit: SeqIter, prod: FilePath):
+    def __init__(self, hmm: FilePath, db: FilePath, seqit: SeqIter, snap: SnapFile):
         self._cscan = ffi.NULL
         self._hmm = Path(hmm)
         self._db = Path(db)
         self._seqit = CSeqIter(seqit)
-        self._prod = Path(prod)
+        self._snap = snap
         self._nthreads = 1
         self._port = 51371
         self._lrt_threshold = 10.0
@@ -65,18 +66,14 @@ class Scan:
     def hmmer3_compat(self, x: bool):
         self._hmmer3_compat = x
 
-    @property
-    def product_filename(self):
-        return self._prod.parent / f"{self._prod.name}.dcs"
-
     def run(self):
-        prod = self._prod
-        if rc := lib.dcp_scan_run(self._cscan, str(prod).encode()):
+        basedir = str(self._snap.basedir)
+        if rc := lib.dcp_scan_run(self._cscan, basedir.encode()):
             raise DeciphonError(rc)
 
-        archive = shutil.make_archive(str(prod), "zip", base_dir=prod)
-        shutil.move(archive, self.product_filename)
-        shutil.rmtree(prod)
+        archive = shutil.make_archive(basedir, "zip", base_dir=basedir)
+        shutil.move(archive, self._snap.path)
+        shutil.rmtree(self._snap.basedir)
 
     def open(self):
         self._cscan = lib.dcp_scan_new(self._port)
