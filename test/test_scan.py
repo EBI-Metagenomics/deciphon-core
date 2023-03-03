@@ -26,7 +26,7 @@ def test_scan(tmp_path: Path, minifam: File, seq_iter):
     with SchedContext(hmmfile) as sched:
         sched.is_ready(True)
         port = sched.master.get_port()
-        with Scan(minifam.name, seq_iter, "prods", port) as scan:
+        with Scan(minifam.name, dcp, seq_iter, "prods", port) as scan:
             scan.run()
 
 

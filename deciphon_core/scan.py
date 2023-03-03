@@ -13,13 +13,15 @@ __all__ = ["Scan"]
 
 
 class Scan:
-    def __init__(self, hmm: FilePath, seqit: SeqIter, prodname: str, port: int):
+    def __init__(
+        self, hmm: FilePath, db: FilePath, seqit: SeqIter, prodname: str, port: int
+    ):
         self._cscan = lib.dcp_scan_new(port)
         if self._cscan == ffi.NULL:
             raise MemoryError()
 
         self._hmm = Path(hmm)
-        self._db = Path(self._hmm.stem + ".dcp")
+        self._db = Path(db)
 
         if rc := lib.dcp_scan_set_nthreads(self._cscan, 1):
             raise DeciphonError(rc)
