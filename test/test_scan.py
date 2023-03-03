@@ -12,10 +12,9 @@ from h3daemon.sched import SchedContext
 
 from deciphon_core.press import Press
 from deciphon_core.scan import Scan
-from deciphon_core.seq import SeqIter, Seq
 
 
-def test_scan(tmp_path: Path, minifam: File):
+def test_scan(tmp_path: Path, minifam: File, seq_iter):
     os.chdir(tmp_path)
     download(minifam.cid, minifam.name, False)
     dcp = Path("minifam.dcp")
@@ -27,10 +26,8 @@ def test_scan(tmp_path: Path, minifam: File):
     with SchedContext(hmmfile) as sched:
         sched.is_ready(True)
         port = sched.master.get_port()
-        scan = Scan(minifam.name, MySeqIter(), "prods", port)
-        scan.run()
-        scan.close()
-    pass
+        with Scan(minifam.name, seq_iter, "prods", port) as scan:
+            scan.run()
 
 
 @dataclass
@@ -44,59 +41,3 @@ def minifam():
     cid = CID("fe305d9c09e123f987f49b9056e34c374e085d8831f815cc73d8ea4cdec84960")
     name = "minifam.hmm"
     return File(cid, name)
-
-
-class MySeqIter(SeqIter):
-    seqs = [
-        Seq(
-            1,
-            b"Homoserine_dh-consensus",
-            b"CCTATCATTTCGACGCTCAAGGAGTCGCTGACAGGTGACCGTATTACTCGAATCGAAGGGATATTAAACG"
-            b"GCACCCTGAATTACATTCTCACTGAGATGGAGGAAGAGGGGGCTTCATTCTCTGAGGCGCTGAAGGAGGC"
-            b"ACAGGAATTGGGCTACGCGGAAGCGGATCCTACGGACGATGTGGAAGGGCTAGATGCTGCTAGAAAGCTG"
-            b"GCAATTCTAGCCAGATTGGCATTTGGGTTAGAGGTCGAGTTGGAGGACGTAGAGGTGGAAGGAATTGAAA"
-            b"AGCTGACTGCCGAAGATATTGAAGAAGCGAAGGAAGAGGGTAAAGTTTTAAAACTAGTGGCAAGCGCCGT"
-            b"CGAAGCCAGGGTCAAGCCTGAGCTGGTACCTAAGTCACATCCATTAGCCTCGGTAAAAGGCTCTGACAAC"
-            b"GCCGTGGCTGTAGAAACGGAACGGGTAGGCGAACTCGTAGTGCAGGGACCAGGGGCTGGCGCAGAGCCAA"
-            b"CCGCATCCGCTGTACTCGCTGACCTTCTC",
-        ),
-        Seq(
-            2,
-            b"AA_kinase-consensus",
-            b"AAACGTGTAGTTGTAAAGCTTGGGGGTAGTTCTCTGACAGATAAGGAAGAGGCATCACTCAGGCGTTTAG"
-            b"CTGAGCAGATTGCAGCATTAAAAGAGAGTGGCAATAAACTAGTGGTCGTGCATGGAGGCGGCAGCTTCAC"
-            b"TGATGGTCTGCTGGCATTGAAAAGTGGCCTGAGCTCGGGCGAATTAGCTGCGGGGTTGAGGAGCACGTTA"
-            b"GAAGAGGCCGGAGAAGTAGCGACGAGGGACGCCCTAGCTAGCTTAGGGGAACGGCTTGTTGCAGCGCTGC"
-            b"TGGCGGCGGGTCTCCCTGCTGTAGGACTCAGCGCCGCTGCGTTAGATGCGACGGAGGCGGGCCGGGATGA"
-            b"AGGCAGCGACGGGAACGTCGAGTCCGTGGACGCAGAAGCAATTGAGGAGTTGCTTGAGGCCGGGGTGGTC"
-            b"CCCGTCCTAACAGGATTTATCGGCTTAGACGAAGAAGGGGAACTGGGAAGGGGATCTTCTGACACCATCG"
-            b"CTGCGTTACTCGCTGAAGCTTTAGGCGCGGACAAACTCATAATACTGACCGACGTAGACGGCGTTTACGA"
-            b"TGCCGACCCTAAAAAGGTCCCAGACGCGAGGCTCTTGCCAGAGATAAGTGTGGACGAGGCCGAGGAAAGC"
-            b"GCCTCCGAATTAGCGACCGGTGGGATGAAGGTCAAACATCCAGCGGCTCTTGCTGCAGCTAGACGGGGGG"
-            b"GTATTCCGGTCGTGATAACGAAT",
-        ),
-        Seq(
-            3,
-            b"23ISL-consensus",
-            b"CAGGGTCTGGATAACGCTAATCGTTCGCTAGTTCGCGCTACAAAAGCAGAAAGTTCAGATATACGGAAAG"
-            b"AGGTGACTAACGGCATCGCTAAAGGGCTGAAGCTAGACAGTCTGGAAACAGCTGCAGAGTCGAAGAACTG"
-            b"CTCAAGCGCACAGAAAGGCGGATCGCTAGCTTGGGCAACCAACTCCCAACCACAGCCTCTCCGTGAAAGT"
-            b"AAGCTTGAGCCATTGGAAGACTCCCCACGTAAGGCTTTAAAAACACCTGTGTTGCAAAAGACATCCAGTA"
-            b"CCATAACTTTACAAGCAGTCAAGGTTCAACCTGAACCCCGCGCTCCCGTCTCCGGGGCGCTGTCCCCGAG"
-            b"CGGGGAGGAACGCAAGCGCCCAGCTGCGTCTGCTCCCGCTACCTTACCGACACGACAGAGTGGTCTAGGT"
-            b"TCTCAGGAAGTCGTTTCGAAGGTGGCGACTCGCAAAATTCCAATGGAGTCACAACGCGAGTCGACT",
-        ),
-    ]
-
-    def __init__(self):
-        self._idx = -1
-        super().__init__()
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        self._idx += 1
-        if self._idx < len(self.seqs):
-            return self.seqs[self._idx]
-        raise StopIteration()
