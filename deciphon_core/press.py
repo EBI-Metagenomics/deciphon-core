@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Optional
 
 from deciphon_core.cffi import ffi, lib
 from deciphon_core.error import DeciphonError
-from deciphon_core.filepath import FilePath
+from deciphon_core.hmmfile import HMMFile
 
 __all__ = ["Press"]
 
@@ -22,10 +21,10 @@ class HMMPress:
 
 
 class Press:
-    def __init__(self, hmm: FilePath, db: FilePath):
+    def __init__(self, hmm: HMMFile):
         self._cpress = ffi.NULL
-        self._hmm = Path(hmm)
-        self._db = Path(db)
+        self._hmm = hmm
+        self._db = hmm.newdbfile
         self._nproteins: int = -1
         self._idx = -1
 
@@ -38,7 +37,9 @@ class Press:
         if self._cpress == ffi.NULL:
             raise MemoryError()
 
-        if rc := lib.dcp_press_open(self._cpress, bytes(self._hmm), bytes(self._db)):
+        hmmpath = bytes(self._hmm.path)
+        dbpath = bytes(self._db.path)
+        if rc := lib.dcp_press_open(self._cpress, hmmpath, dbpath):
             raise DeciphonError(rc)
 
     def close(self):

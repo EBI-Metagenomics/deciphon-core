@@ -1,21 +1,45 @@
 from pathlib import Path
 
-from deciphon_core.filepath import FilePath
+from pydantic import BaseModel, FilePath, validator
 
-__all__ = ["SnapFile"]
+__all__ = ["SnapFile", "NewSnapFile"]
 
 
-class SnapFile:
-    def __init__(self, filename: FilePath):
-        filename = Path(filename)
-        if filename.name == filename.stem:
-            raise ValueError("Snap file must have an extension.")
-        self._file = filename
+class SnapFile(BaseModel):
+    path: FilePath
 
-    @property
-    def path(self):
-        return self._file
+    @validator("path")
+    def must_have_extension(cls, x: FilePath):
+        if x.suffix != ".dcs":
+            raise ValueError("must end in `.dcs`")
+        return x
+
+
+class NewSnapFile(BaseModel):
+    path: Path
+
+    @validator("path")
+    def must_have_extension(cls, x: Path):
+        if x.suffix != ".dcs":
+            raise ValueError("must end in `.dcs`")
+        return x
+
+    @validator("path")
+    def must_not_exist(cls, x: Path):
+        if x.exists():
+            raise ValueError("path already exists")
+        return x
+
+    @validator("path")
+    def basedir_must_not_exist(cls, x: Path):
+        if basedir(x).exists():
+            raise ValueError(f"`{basedir(x)}` must not exist")
+        return x
 
     @property
     def basedir(self):
-        return self._file.parent / f"{self._file.stem}"
+        return basedir(self.path)
+
+
+def basedir(x: Path):
+    return x.parent / f"{x.stem}"

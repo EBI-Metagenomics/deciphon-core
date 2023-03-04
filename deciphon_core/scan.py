@@ -1,23 +1,22 @@
 from __future__ import annotations
 
 import shutil
-from pathlib import Path
 
 from deciphon_core.cffi import ffi, lib
-from deciphon_core.error import DeciphonError
-from deciphon_core.filepath import FilePath
-from deciphon_core.seq import SeqIter
 from deciphon_core.cseq import CSeqIter
-from deciphon_core.snapfile import SnapFile
+from deciphon_core.error import DeciphonError
+from deciphon_core.hmmfile import HMMFile
+from deciphon_core.seq import SeqIter
+from deciphon_core.snapfile import NewSnapFile
 
 __all__ = ["Scan"]
 
 
 class Scan:
-    def __init__(self, hmm: FilePath, db: FilePath, seqit: SeqIter, snap: SnapFile):
+    def __init__(self, hmm: HMMFile, seqit: SeqIter, snap: NewSnapFile):
         self._cscan = ffi.NULL
-        self._hmm = Path(hmm)
-        self._db = Path(db)
+        self._hmm = hmm
+        self._db = hmm.dbfile
         self._seqit = CSeqIter(seqit)
         self._snap = snap
         self._nthreads = 1
@@ -87,7 +86,7 @@ class Scan:
         lib.dcp_scan_set_multi_hits(self._cscan, self._multi_hits)
         lib.dcp_scan_set_hmmer3_compat(self._cscan, self._hmmer3_compat)
 
-        if rc := lib.dcp_scan_set_db_file(self._cscan, bytes(self._db)):
+        if rc := lib.dcp_scan_set_db_file(self._cscan, bytes(self._db.path)):
             raise DeciphonError(rc)
 
         it = self._seqit
