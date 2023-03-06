@@ -103,6 +103,5 @@ class Scan:
         self.close()
 
     def __del__(self):
-        if self._cscan != ffi.NULL:
+        if getattr(self, "_cscan", ffi.NULL) != ffi.NULL:
             lib.dcp_scan_del(self._cscan)
-            self._cscan = ffi.NULL

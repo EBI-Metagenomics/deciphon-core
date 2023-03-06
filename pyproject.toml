@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "deciphon-core"
-version = "0.8.0"
+version = "0.8.1"
 description = "Python package for biding the C implementation"
 authors = ["Danilo Horta <danilo.horta@pm.me>"]
 license = "MIT"
@@ -22,6 +22,7 @@ pydantic = ">=1.10.5"
 pytest = ">=7.2.0"
 pyright = ">=1.1.288"
 blx = ">=0.1.8"
+pre-commit = "^3.1.1"
 
 [tool.poetry.build]
 script = "build_ext.py"

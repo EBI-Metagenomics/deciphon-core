@@ -51,5 +51,5 @@ class H3Result:
         lib.fclose(fp)
 
     def __del__(self):
-        if self._cdata != ffi.NULL:
+        if getattr(self, "_cdata", ffi.NULL) != ffi.NULL:
             lib.h3c_result_del(self._cdata)

@@ -72,6 +72,5 @@ class Press:
         raise StopIteration()
 
     def __del__(self):
-        if self._cpress != ffi.NULL:
+        if getattr(self, "_cpress", ffi.NULL) != ffi.NULL:
             lib.dcp_press_del(self._cpress)
-            self._cpress = ffi.NULL

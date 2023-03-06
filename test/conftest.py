@@ -1,10 +1,6 @@
 import os
-from functools import partial
-from pathlib import Path
 
 import pytest
-from blx.cid import CID
-from blx.download import download
 
 from deciphon_core.seq import Seq, SeqIter
 
