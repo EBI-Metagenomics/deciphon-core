@@ -23,6 +23,7 @@ class Scan:
         self._port = 51371
         self._lrt_threshold = 10.0
         self._multi_hits = True
+        self._heuristic = False
         self._hmmer3_compat = False
 
     @property
@@ -65,6 +66,14 @@ class Scan:
     def hmmer3_compat(self, x: bool):
         self._hmmer3_compat = x
 
+    @property
+    def heuristic(self):
+        return self._heuristic
+
+    @heuristic.setter
+    def heuristic(self, x: bool):
+        self._heuristic = x
+
     def run(self):
         basedir = str(self._snap.basedir)
         if rc := lib.dcp_scan_run(self._cscan, basedir.encode()):
@@ -85,6 +94,7 @@ class Scan:
         lib.dcp_scan_set_lrt_threshold(self._cscan, self._lrt_threshold)
         lib.dcp_scan_set_multi_hits(self._cscan, self._multi_hits)
         lib.dcp_scan_set_hmmer3_compat(self._cscan, self._hmmer3_compat)
+        lib.dcp_scan_set_heuristic(self._cscan, self._heuristic)
 
         if rc := lib.dcp_scan_set_db_file(self._cscan, bytes(self._db.path)):
             raise DeciphonError(rc)

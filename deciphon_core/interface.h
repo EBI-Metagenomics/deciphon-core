@@ -23,6 +23,7 @@ int dcp_scan_set_nthreads(struct dcp_scan *, int nthreads);
 void dcp_scan_set_lrt_threshold(struct dcp_scan *, double);
 void dcp_scan_set_multi_hits(struct dcp_scan *, bool);
 void dcp_scan_set_hmmer3_compat(struct dcp_scan *, bool);
+void dcp_scan_set_heuristic(struct dcp_scan *, bool);
 
 int dcp_scan_set_db_file(struct dcp_scan *, char const *db);
 void dcp_scan_set_seq_iter(struct dcp_scan *, dcp_seq_next_fn *, void *);
