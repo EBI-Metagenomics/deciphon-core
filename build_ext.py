@@ -46,10 +46,10 @@ EXTS = [
     Ext("horta", "elapsed", "3.1.2", CMAKE_OPTS),
     Ext("EBI-Metagenomics", "lip", "0.5.0", CMAKE_OPTS),
     Ext("EBI-Metagenomics", "hmr", "0.6.0", CMAKE_OPTS),
-    Ext("EBI-Metagenomics", "imm", "2.2.1", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "imm", "2.3.1", CMAKE_OPTS + CPM_OPTS),
     Ext("nanomsg", "nng", "1.5.2", CMAKE_OPTS + NNG_OPTS),
     Ext("EBI-Metagenomics", "h3c", "0.10.5", CMAKE_OPTS + CPM_OPTS),
-    Ext("EBI-Metagenomics", "deciphon", "0.6.1", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "deciphon", "0.7.1", CMAKE_OPTS + CPM_OPTS),
 ]
 
 
