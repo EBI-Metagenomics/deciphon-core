@@ -60,6 +60,7 @@ def rm(folder: Path, pattern: str):
 
 def resolve_bin(bin: str):
     paths = [sysconfig.get_path("scripts", x) for x in sysconfig.get_scheme_names()]
+    paths += ["/usr/local/bin/"]
     for x in paths:
         y = Path(x) / bin
         if y.exists():
