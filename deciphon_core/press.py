@@ -21,12 +21,13 @@ class HMMPress:
 
 
 class Press:
-    def __init__(self, hmm: HMMFile):
+    def __init__(self, hmm: HMMFile, codon_table: int = 1):
         self._cpress = ffi.NULL
         self._hmm = hmm
         self._db = hmm.newdbfile
         self._nproteins: int = -1
         self._idx = -1
+        self._codon_table = codon_table
 
     @property
     def cpress(self):
@@ -39,7 +40,7 @@ class Press:
 
         hmmpath = bytes(self._hmm.path)
         dbpath = bytes(self._db.path)
-        if rc := lib.dcp_press_open(self._cpress, hmmpath, dbpath):
+        if rc := lib.dcp_press_open(self._cpress, self._codon_table, hmmpath, dbpath):
             raise DeciphonError(rc)
 
     def close(self):

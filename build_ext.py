@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import sys
+import sysconfig
 import tarfile
 import urllib.request
 from dataclasses import dataclass
@@ -42,20 +43,28 @@ class Ext:
 
 
 EXTS = [
-    Ext("horta", "logaddexp", "2.1.14", CMAKE_OPTS),
     Ext("horta", "elapsed", "3.1.2", CMAKE_OPTS),
-    Ext("EBI-Metagenomics", "lip", "0.5.0", CMAKE_OPTS),
+    Ext("EBI-Metagenomics", "lip", "0.5.1", CMAKE_OPTS),
     Ext("EBI-Metagenomics", "hmr", "0.6.0", CMAKE_OPTS),
-    Ext("EBI-Metagenomics", "imm", "2.3.2", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "imm", "3.0.5", CMAKE_OPTS + CPM_OPTS),
     Ext("nanomsg", "nng", "1.5.2", CMAKE_OPTS + NNG_OPTS),
-    Ext("EBI-Metagenomics", "h3c", "0.10.5", CMAKE_OPTS + CPM_OPTS),
-    Ext("EBI-Metagenomics", "deciphon", "0.7.3", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "h3c", "0.10.6", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "deciphon", "0.8.2", CMAKE_OPTS + CPM_OPTS),
 ]
 
 
 def rm(folder: Path, pattern: str):
     for filename in folder.glob(pattern):
         filename.unlink()
+
+
+def resolve_bin(bin: str):
+    paths = [sysconfig.get_path("scripts", x) for x in sysconfig.get_scheme_names()]
+    for x in paths:
+        y = Path(x) / bin
+        if y.exists():
+            return str(y)
+    raise RuntimeError(f"Failed to find {bin}.")
 
 
 def build_ext(ext: Ext):
@@ -86,6 +95,7 @@ def build_ext(ext: Ext):
     check_call([cmake, "--install", str(bld_dir), "--prefix", str(PKG)])
 
 
+sysconfig.get_path("scripts", f"{os.name}_user")
 if __name__ == "__main__":
     from cffi import FFI
 
@@ -119,7 +129,7 @@ if __name__ == "__main__":
     shutil.rmtree(LIB / "cmake", ignore_errors=True)
 
     if sys.platform == "linux":
-        patch = ["patchelf", "--set-rpath", "$ORIGIN"]
+        patch = [resolve_bin("patchelf"), "--set-rpath", "$ORIGIN"]
         for lib in LIB.glob("*.so*"):
             check_call(patch + [str(lib)])
 

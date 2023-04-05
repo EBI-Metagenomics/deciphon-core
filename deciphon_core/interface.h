@@ -9,7 +9,8 @@ void dcp_seq_setup(struct dcp_seq *, long id, char const *name,
                    char const *data);
 
 struct dcp_press *dcp_press_new(void);
-int dcp_press_open(struct dcp_press *, char const *hmm, char const *db);
+int dcp_press_open(struct dcp_press *, int gencode_id, char const *hmm,
+                   char const *db);
 long dcp_press_nproteins(struct dcp_press const *);
 int dcp_press_next(struct dcp_press *);
 bool dcp_press_end(struct dcp_press const *);
