@@ -46,10 +46,10 @@ EXTS = [
     Ext("horta", "elapsed", "3.1.2", CMAKE_OPTS),
     Ext("EBI-Metagenomics", "lip", "0.5.1", CMAKE_OPTS),
     Ext("EBI-Metagenomics", "hmr", "0.6.0", CMAKE_OPTS),
-    Ext("EBI-Metagenomics", "imm", "3.0.6", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "imm", "3.0.7", CMAKE_OPTS + CPM_OPTS),
     Ext("nanomsg", "nng", "1.5.2", CMAKE_OPTS + NNG_OPTS),
-    Ext("EBI-Metagenomics", "h3c", "0.10.6", CMAKE_OPTS + CPM_OPTS),
-    Ext("EBI-Metagenomics", "deciphon", "0.8.3", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "h3c", "0.11.0", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "deciphon", "0.8.4", CMAKE_OPTS + CPM_OPTS),
 ]
 
 
@@ -96,7 +96,6 @@ def build_ext(ext: Ext):
     check_call([cmake, "--install", str(bld_dir), "--prefix", str(PKG)])
 
 
-sysconfig.get_path("scripts", f"{os.name}_user")
 if __name__ == "__main__":
     from cffi import FFI
 
@@ -106,8 +105,15 @@ if __name__ == "__main__":
     rm(PKG / "lib", "**/lib*")
     shutil.rmtree(TMP, ignore_errors=True)
 
-    for ext in EXTS:
-        build_ext(ext)
+    if not os.environ.get("DECIPHON_CORE_SKIP_BUILD_EXT", False):
+        for ext in EXTS:
+            build_ext(ext)
+
+    libs = os.environ.get("DECIPHON_CORE_LIB_PATH", "").split(";")
+    incls = os.environ.get("DECIPHON_CORE_INCLUDE_PATH", "").split(";")
+
+    libs = [x for x in libs if len(x) > 0]
+    incls = [x for x in incls if len(x) > 0]
 
     ffibuilder.cdef(open(INTERFACE, "r").read())
     ffibuilder.set_source(
@@ -118,8 +124,8 @@ if __name__ == "__main__":
         """,
         language="c",
         libraries=["deciphon", "h3c"],
-        library_dirs=[str(LIB)],
-        include_dirs=[str(INCL)],
+        library_dirs=libs + [str(LIB)],
+        include_dirs=incls + [str(INCL)],
         extra_link_args=[str(EXTRA)],
     )
     ffibuilder.compile(verbose=True)

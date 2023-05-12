@@ -27,7 +27,7 @@ class NewSnapFile(BaseModel):
     @validator("path")
     def must_not_exist(cls, x: Path):
         if x.exists():
-            raise ValueError("path already exists")
+            x.unlink()
         return x
 
     @validator("path")
