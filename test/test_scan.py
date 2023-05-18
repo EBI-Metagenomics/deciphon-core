@@ -32,6 +32,6 @@ def test_scan(tmp_path: Path, seq_iter):
     with SchedContext(hmmfile) as sched:
         sched.is_ready(True)
         scan = Scan(HMMFile(path=hmm), seq_iter, NewSnapFile(path=Path("snap.dcs")))
-        scan.port = sched.master.get_port()
+        scan.port = sched.get_cport()
         with scan:
             scan.run()

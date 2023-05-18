@@ -44,12 +44,12 @@ class Ext:
 
 EXTS = [
     Ext("horta", "elapsed", "3.1.2", CMAKE_OPTS),
-    Ext("EBI-Metagenomics", "lip", "0.5.1", CMAKE_OPTS),
-    Ext("EBI-Metagenomics", "hmr", "0.6.0", CMAKE_OPTS),
-    Ext("EBI-Metagenomics", "imm", "3.0.7", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "lip", "0.5.2", CMAKE_OPTS),
+    Ext("EBI-Metagenomics", "hmr", "0.6.1", CMAKE_OPTS),
+    Ext("EBI-Metagenomics", "imm", "3.0.9", CMAKE_OPTS + CPM_OPTS),
     Ext("nanomsg", "nng", "1.5.2", CMAKE_OPTS + NNG_OPTS),
-    Ext("EBI-Metagenomics", "h3c", "0.11.0", CMAKE_OPTS + CPM_OPTS),
-    Ext("EBI-Metagenomics", "deciphon", "0.8.4", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "h3c", "0.11.2", CMAKE_OPTS + CPM_OPTS),
+    Ext("EBI-Metagenomics", "deciphon", "0.8.5", CMAKE_OPTS + CPM_OPTS),
 ]
 
 
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     rm(PKG / "lib", "**/lib*")
     shutil.rmtree(TMP, ignore_errors=True)
 
-    if not os.environ.get("DECIPHON_CORE_SKIP_BUILD_EXT", False):
+    if not os.environ.get("DECIPHON_CORE_DEVELOP", False):
         for ext in EXTS:
             build_ext(ext)
 
@@ -135,19 +135,20 @@ if __name__ == "__main__":
     shutil.rmtree(SHARE, ignore_errors=True)
     shutil.rmtree(LIB / "cmake", ignore_errors=True)
 
-    if sys.platform == "linux":
-        patch = [resolve_bin("patchelf"), "--set-rpath", "$ORIGIN"]
-        for lib in LIB.glob("*.so*"):
-            check_call(patch + [str(lib)])
+    if not os.environ.get("DECIPHON_CORE_DEVELOP", False):
+        if sys.platform == "linux":
+            patch = [resolve_bin("patchelf"), "--set-rpath", "$ORIGIN"]
+            for lib in LIB.glob("*.so*"):
+                check_call(patch + [str(lib)])
 
-    find = ["/usr/bin/find", str(LIB), "-type", "l"]
-    exec0 = ["-exec", "/bin/cp", "{}", "{}.tmp", ";"]
-    exec1 = ["-exec", "/bin/mv", "{}.tmp", "{}", ";"]
-    check_call(find + exec0 + exec1)
+        find = ["/usr/bin/find", str(LIB), "-type", "l"]
+        exec0 = ["-exec", "/bin/cp", "{}", "{}.tmp", ";"]
+        exec1 = ["-exec", "/bin/mv", "{}.tmp", "{}", ";"]
+        check_call(find + exec0 + exec1)
 
-    for x in list(LIB.iterdir()):
-        linux_pattern = r"lib[^.]*\.so\.[0-9]+"
-        macos_pattern = r"lib[^.]*\.[0-9]+\.dylib"
-        pattern = r"^(" + linux_pattern + r"|" + macos_pattern + r")$"
-        if not re.match(pattern, x.name):
-            x.unlink()
+        for x in list(LIB.iterdir()):
+            linux_pattern = r"lib[^.]*\.so\.[0-9]+"
+            macos_pattern = r"lib[^.]*\.[0-9]+\.dylib"
+            pattern = r"^(" + linux_pattern + r"|" + macos_pattern + r")$"
+            if not re.match(pattern, x.name):
+                x.unlink()
